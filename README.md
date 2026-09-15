@@ -64,4 +64,11 @@ Built with Claude Code as a pair programmer. What it did and what I did:
   I ran the deploy commands myself, as they publish a public endpoint.
 
 ## Docs
-- [Model card](docs/model_card.md) — data, GDPR considerations, metrics, limitations
+- [Model card](docs/model_card.md) — data, GDPR considerations, metrics, the age decision, limitations
+- [EDA notebook](notebooks/01_eda.ipynb) · [SHAP explanations](notebooks/02_model_explain.ipynb)
+
+## Data attribution
+Bank Account Fraud (BAF) dataset suite — Jesus, S., Pombal, J., Alves, D., Cruz, A., Saleiro, P., Ribeiro, R.,
+Gama, J., Bizarro, P. *Turning the Tables: Biased, Imbalanced, Dynamic Tabular Datasets for ML Evaluation*,
+NeurIPS 2022 Datasets and Benchmarks. Licensed [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/);
+used here for non-commercial, educational purposes. The data is not redistributed in this repository.
