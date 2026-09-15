@@ -10,6 +10,8 @@ env:
 
 jobs:
   deploy:
+    # Skipped until the repo variable DEPLOY_ENABLED=true is set (Settings → Variables → Actions)
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
