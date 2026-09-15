@@ -16,6 +16,8 @@ deployed to Cloud Run.
 | What-if tool | `app/streamlit_app.py` | Slide the threshold, set £ costs, see fraud caught vs customers blocked |
 | CI/CD | `.github/workflows` | Lint → tests → synthetic pipeline → fairness gate → deploy to Cloud Run |
 
+**Live app:** https://fraud-monitor-237612887168.europe-west2.run.app
+
 ## Quickstart
 
 ```bash
@@ -43,7 +45,23 @@ Held-out "production" months 6–7: recall 50–55% at a realised FPR of 3.5–5
 - **Fairness:** with `customer_age` as an input, applicants aged 50+ were wrongly held 3.1× more often than under-50s (FPR 11.5% vs 3.7%). Withholding age costs 0.9 pt of recall and cuts the gap to 2.5× — but not to parity, because income, credit limit and credit score are age proxies. The [model card](docs/model_card.md) documents the decision, the measured cost, and the alternatives considered.
 
 ## How AI tools were used
-_Document here: what Claude Code / Copilot generated, what you changed and why. Interviewers ask._
+
+Built with Claude Code as a pair programmer. What it did and what I did:
+
+- **Scaffold:** Claude generated the initial repo structure, SQL feature layer, training/monitoring
+  code, tests, CI/CD workflows and Dockerfile from a description of the project. I reviewed each
+  file before the first commit.
+- **Bugs it caught / caused:** the first test run failed on PSI over a boolean column (its own
+  code); it fixed it. LightGBM failed on Cloud Run with a missing `libgomp.so.1` — a Dockerfile
+  dependency it had left out. Both are the kind of thing you only find by running the code.
+- **EDA notebook:** Claude drafted the analysis and the takeaway text — then checked the text against
+  the actual outputs and corrected several claims it had written from memory of the BAF paper
+  (e.g. which feature separates fraud most strongly). The lesson: generated narrative needs
+  verifying against generated numbers.
+- **The age decision (§5 of the model card)** was mine. Claude laid out three options with
+  trade-offs; I chose to withhold `customer_age`, and it ran the retrain to quantify the cost.
+- **Infra:** Claude ran the GCP setup (project, Workload Identity Federation, bucket, secrets).
+  I ran the deploy commands myself, as they publish a public endpoint.
 
 ## Docs
 - [Model card](docs/model_card.md) — data, GDPR considerations, metrics, limitations
