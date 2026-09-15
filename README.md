@@ -42,7 +42,7 @@ Held-out "production" months 6–7: recall 50–55% at a realised FPR of 3.5–5
 
 **Monitoring findings**
 - Five features drifted (PSI > 0.25) in production months, all rolling-window counts — `velocity_4w` (PSI 2.9), `velocity_24h` (1.6), `velocity_6h` (0.9), `zip_count_4w`, `date_of_birth_distinct_emails_4w`. The derived velocity *ratios* stayed in the "watch" band (0.13–0.15), so ratio features are more robust to volume shifts than raw counts.
-- **Fairness:** with `customer_age` as an input, applicants aged 50+ were wrongly held 3.1× more often than under-50s (FPR 11.5% vs 3.7%). Withholding age costs 0.9 pt of recall and cuts the gap to 2.5× — but not to parity, because income, credit limit and credit score are age proxies. The [model card](docs/model_card.md) documents the decision, the measured cost, and the alternatives considered.
+- **Fairness:** with `customer_age` as an input, applicants aged 50+ were wrongly held 3.1× more often than under-50s (FPR 11.5% vs 3.7%). Withholding age costs 0.9 pt of recall and cuts the gap to 2.5× — but not to parity, because income, credit limit and credit score are age proxies. Removing those too was tested and rejected: −9.2 pt recall for a gap of 2.2× ([experiment](docs/experiments/proxy_removal.md)). The [model card](docs/model_card.md) documents the decision, the measured costs, and what to try next.
 
 ## How AI tools were used
 
