@@ -17,8 +17,8 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v5
       - run: uv python install 3.11 && uv sync
       # Retrain on merge. Swap --synthetic for a step that pulls Base.csv from GCS once you have it.
       - run: uv run fm all --synthetic
