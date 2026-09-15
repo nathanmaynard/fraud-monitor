@@ -13,7 +13,7 @@ deployed to Cloud Run.
 | Models | logistic regression baseline vs LightGBM | Selected on **recall @ 5% FPR**, not accuracy (1% prevalence) |
 | Time-based split | months 0–4 fit, 5 validate, 6–7 "production" | No leakage; mimics real deployment |
 | Monitoring | `monitor.py` — PSI drift, per-month recall/FPR, age-group fairness | Model risk / compliance requirement |
-| What-if tool | `app/streamlit_app.py` | Slide the threshold, set £ costs, see fraud caught vs customers blocked |
+| What-if tool | `app/streamlit_app.py`, `policy.py` | Set £ costs and review-team capacity; get the cost-optimal threshold, the best threshold the team can actually run, and the £ value of one more analyst |
 | CI/CD | `.github/workflows` | Lint → tests → synthetic pipeline → fairness gate → deploy to Cloud Run |
 
 **Live app:** https://fraud-monitor-237612887168.europe-west2.run.app
