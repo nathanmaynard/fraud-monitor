@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Model | LightGBM binary classifier (`models/model.joblib`), 400 trees, class-weighted |
-| Version | v0.2 — `customer_age` withheld from inputs (v0.1 included it; see §5) |
+| Version | v0.2 — `customer_age` withheld from inputs (v0.1 included it; v0.3 proxy-removal tested and rejected; see §5) |
 | Owner | Nathan Maynard |
 | Training data | BAF `Base`, months 0–4 (fit), month 5 (validation / threshold) |
 | Held-out evaluation | months 6–7, treated as post-deployment "production" |
@@ -93,10 +93,24 @@ first step (you cannot defend a model that takes age as a direct input), not a s
 1. *Group-specific thresholds* to equalise FPR — same model, higher threshold for 50+. Explicit and auditable,
    but applying a different rule by age is itself direct age discrimination under the Equality Act unless
    justified as a proportionate means to a legitimate aim; rejected for now.
-2. *Remove the proxies too* — would push the model toward device/velocity signals only; recall cost expected to be
-   large. Not measured yet; the next experiment.
-3. *Reweighting / fairness-constrained training* (e.g. the constrained methods benchmarked in the BAF paper).
-   Not implemented in this version.
+2. *Remove the proxies too* (`housing_status`, `income`, `credit_risk_score`, `proposed_credit_limit`,
+   `employment_status`) — **measured, rejected.** `experiments/proxy_removal.py`, full table in
+   [docs/experiments/proxy_removal.md](experiments/proxy_removal.md):
+
+   | | Recall @ 5% FPR | FPR ratio | Recall, 50+ |
+   |---|---|---|---|
+   | v0.1 with age | 53.8% | 3.11× | 67.0% |
+   | v0.2 no age (deployed) | 52.9% | 2.48× | 62.6% |
+   | v0.3 no age, no proxies | 43.7% | 2.17× | 49.9% |
+
+   Dropping the proxies costs **9.2 points of recall** (roughly one in six fraudulent applications that v0.2
+   catches would now get through) to move the ratio by 0.31× — about twenty times worse a trade than removing
+   age was. And the gap still does not close: the features that remain (`device_os`, missing previous-address
+   history, phone validity, session behaviour) are behaviourally age-correlated as well. Deleting features is
+   the wrong tool past this point.
+3. *Reweighting / fairness-constrained training* (e.g. the constrained methods benchmarked in the BAF paper),
+   or post-hoc score adjustment with a documented justification. This is the right next step; not implemented
+   in this version.
 
 **Ongoing control.** `monitor.py` computes the FPR ratio on every run; CI fails the build if it exceeds 3.0×.
 The current 2.48× is within that gate but should be reported to model-risk governance as a known disparity.

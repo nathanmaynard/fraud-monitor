@@ -11,7 +11,6 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from fraud_monitor import config, metrics
-from fraud_monitor.features import split_xy
 
 st.set_page_config(page_title="Fraud threshold what-if", layout="wide")
 st.title("Account-opening fraud: threshold what-if")
@@ -25,8 +24,8 @@ def load():
     for c in config.CATEGORICAL:
         feat[c] = feat[c].astype("category")
     prod = feat[feat[config.MONTH].isin(config.PROD_MONTHS)]
-    X, y = split_xy(prod)
-    scores = bundle["model"].predict_proba(X[bundle["features"]])[:, 1]
+    y = prod[config.TARGET]
+    scores = bundle["model"].predict_proba(prod[bundle["features"]])[:, 1]
     return bundle, y.to_numpy(), scores, prod
 
 

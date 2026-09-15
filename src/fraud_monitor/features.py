@@ -21,7 +21,9 @@ def build_features(df: pd.DataFrame | None = None, db_path=config.DUCKDB_PATH) -
     return out
 
 
-def split_xy(feat: pd.DataFrame):
-    X = feat.drop(columns=[config.TARGET, config.MONTH, *config.EXCLUDE_FROM_MODEL], errors="ignore")
+def split_xy(feat: pd.DataFrame, exclude: list[str] | None = None):
+    """Split into model inputs / target. `exclude` defaults to config.EXCLUDE_FROM_MODEL."""
+    drop = config.EXCLUDE_FROM_MODEL if exclude is None else exclude
+    X = feat.drop(columns=[config.TARGET, config.MONTH, *drop], errors="ignore")
     y = feat[config.TARGET]
     return X, y

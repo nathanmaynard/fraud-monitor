@@ -37,19 +37,25 @@ def _lgbm() -> lgb.LGBMClassifier:
     )
 
 
-def train(feat: pd.DataFrame, model_path=config.MODEL_PATH, report_path=config.REPORTS / "train_metrics.json"):
+def train(
+    feat: pd.DataFrame,
+    model_path=config.MODEL_PATH,
+    report_path=config.REPORTS / "train_metrics.json",
+    exclude: list[str] | None = None,
+):
     train_df = feat[feat[config.MONTH].isin(config.TRAIN_MONTHS)]
     # last training month is the validation slice (time-ordered, no leakage)
     val_month = max(config.TRAIN_MONTHS)
     fit = train_df[train_df[config.MONTH] != val_month]
     val = train_df[train_df[config.MONTH] == val_month]
 
-    X_fit, y_fit = split_xy(fit)
-    X_val, y_val = split_xy(val)
-    numeric = [c for c in X_fit.columns if c not in config.CATEGORICAL]
+    X_fit, y_fit = split_xy(fit, exclude)
+    X_val, y_val = split_xy(val, exclude)
+    categorical = [c for c in X_fit.columns if c in config.CATEGORICAL]
+    numeric = [c for c in X_fit.columns if c not in categorical]
 
     models = {
-        "logreg": _baseline(numeric, config.CATEGORICAL),
+        "logreg": _baseline(numeric, categorical),
         "lgbm": _lgbm(),
     }
     results = {}
@@ -65,7 +71,9 @@ def train(feat: pd.DataFrame, model_path=config.MODEL_PATH, report_path=config.R
     thr = metrics.threshold_at_fpr(y_val, scores_val, config.FPR_BUDGET)
 
     model_path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump({"model": best, "name": best_name, "threshold": thr, "features": list(X_fit.columns)}, model_path)
+    bundle = {"model": best, "name": best_name, "threshold": thr, "features": list(X_fit.columns),
+              "excluded": list(config.EXCLUDE_FROM_MODEL if exclude is None else exclude)}
+    joblib.dump(bundle, model_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps({"validation": results, "selected": best_name, "threshold": thr}, indent=2))
     return best_name, results, thr

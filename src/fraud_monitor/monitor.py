@@ -30,9 +30,11 @@ def psi(expected: pd.Series, actual: pd.Series, bins: int = 10) -> float:
     return float(np.sum((a - e) * np.log(a / e)))
 
 
-def feature_drift(train_feat: pd.DataFrame, prod_feat: pd.DataFrame) -> pd.DataFrame:
+def feature_drift(train_feat: pd.DataFrame, prod_feat: pd.DataFrame, features: list[str] | None = None) -> pd.DataFrame:
     X_tr, _ = split_xy(train_feat)
     X_pr, _ = split_xy(prod_feat)
+    if features is not None:
+        X_tr, X_pr = X_tr[features], X_pr[features]
     rows = [{"feature": c, "psi": psi(X_tr[c], X_pr[c])} for c in X_tr.columns]
     out = pd.DataFrame(rows).sort_values("psi", ascending=False)
     out["status"] = pd.cut(out["psi"], [-1, 0.1, 0.25, np.inf], labels=["stable", "watch", "drifted"])
@@ -42,8 +44,8 @@ def feature_drift(train_feat: pd.DataFrame, prod_feat: pd.DataFrame) -> pd.DataF
 def performance_by_month(feat: pd.DataFrame, bundle: dict) -> pd.DataFrame:
     rows = []
     for m, g in feat.groupby(config.MONTH):
-        X, y = split_xy(g)
-        s = bundle["model"].predict_proba(X[bundle["features"]])[:, 1]
+        y = g[config.TARGET]
+        s = bundle["model"].predict_proba(g[bundle["features"]])[:, 1]
         row = metrics.summary(y, s, config.FPR_BUDGET)
         row.update(metrics.confusion_at_threshold(y, s, bundle["threshold"]))
         row["month"] = m
@@ -55,8 +57,8 @@ def performance_by_month(feat: pd.DataFrame, bundle: dict) -> pd.DataFrame:
 def fairness(feat: pd.DataFrame, bundle: dict) -> pd.DataFrame:
     """FPR / recall split by protected group at the deployed threshold.
     A large FPR gap means one group is being wrongly blocked more often."""
-    X, y = split_xy(feat)
-    s = bundle["model"].predict_proba(X[bundle["features"]])[:, 1]
+    y = feat[config.TARGET]
+    s = bundle["model"].predict_proba(feat[bundle["features"]])[:, 1]
     group = np.where(feat[config.PROTECTED_ATTR] >= config.PROTECTED_THRESHOLD, "older", "younger")
     rows = []
     for gname in ["younger", "older"]:
@@ -75,7 +77,7 @@ def run(feat: pd.DataFrame, model_path=config.MODEL_PATH, out_dir=config.REPORTS
     train_feat = feat[feat[config.MONTH].isin(config.TRAIN_MONTHS)]
     prod_feat = feat[feat[config.MONTH].isin(config.PROD_MONTHS)]
 
-    drift = feature_drift(train_feat, prod_feat)
+    drift = feature_drift(train_feat, prod_feat, bundle["features"])
     perf = performance_by_month(feat, bundle)
     fair = fairness(prod_feat, bundle)
 
