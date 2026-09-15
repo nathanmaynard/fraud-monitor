@@ -20,7 +20,8 @@ st.title("Account-opening fraud: threshold what-if")
 @st.cache_resource
 def load():
     bundle = joblib.load(config.MODEL_PATH)
-    feat = pd.read_parquet(config.FEATURES_PARQUET)
+    src = config.APP_PARQUET if config.APP_PARQUET.exists() else config.FEATURES_PARQUET
+    feat = pd.read_parquet(src)
     for c in config.CATEGORICAL:
         feat[c] = feat[c].astype("category")
     prod = feat[feat[config.MONTH].isin(config.PROD_MONTHS)]

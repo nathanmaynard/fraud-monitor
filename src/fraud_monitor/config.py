@@ -10,6 +10,8 @@ SQL_DIR = ROOT / "sql"
 RAW_CSV = DATA_RAW / "Base.csv"
 DUCKDB_PATH = DATA_PROCESSED / "baf.duckdb"
 FEATURES_PARQUET = DATA_PROCESSED / "features.parquet"
+# Production-months slice only; this is what ships in the container for the what-if app.
+APP_PARQUET = DATA_PROCESSED / "app_features.parquet"
 MODEL_PATH = MODELS / "model.joblib"
 
 TARGET = "fraud_bool"

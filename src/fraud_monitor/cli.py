@@ -26,6 +26,7 @@ def main(argv=None):
         feat = build_features(df)
         config.FEATURES_PARQUET.parent.mkdir(parents=True, exist_ok=True)
         feat.to_parquet(config.FEATURES_PARQUET)
+        feat[feat[config.MONTH].isin(config.PROD_MONTHS)].to_parquet(config.APP_PARQUET)
         print(f"prepared {len(feat):,} rows -> {config.FEATURES_PARQUET}")
 
     if a.command in ("train", "all"):
