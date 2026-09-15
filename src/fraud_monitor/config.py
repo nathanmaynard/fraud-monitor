@@ -25,4 +25,8 @@ FPR_BUDGET = 0.05
 PROTECTED_ATTR = "customer_age"
 PROTECTED_THRESHOLD = 50
 
+# Columns kept in the feature table for monitoring/fairness but withheld from the model.
+# customer_age is a protected characteristic; see docs/model_card.md for the decision and its cost.
+EXCLUDE_FROM_MODEL = [PROTECTED_ATTR]
+
 CATEGORICAL = ["payment_type", "employment_status", "housing_status", "source", "device_os"]

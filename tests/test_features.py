@@ -18,3 +18,10 @@ def test_velocity_ratio_finite(feat):
 def test_categoricals_typed(feat):
     for c in config.CATEGORICAL:
         assert feat[c].dtype.name == "category"
+
+
+def test_protected_attribute_excluded_from_model_inputs(feat):
+    from fraud_monitor.features import split_xy
+    X, _ = split_xy(feat)
+    assert config.PROTECTED_ATTR not in X.columns
+    assert config.PROTECTED_ATTR in feat.columns  # still available for fairness monitoring

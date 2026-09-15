@@ -32,14 +32,15 @@ Validation = month 5 (time-ordered, out-of-sample). Threshold chosen for a 5% fa
 
 | Model | AUC | Avg precision | Recall @ 5% FPR |
 |---|---|---|---|
-| Logistic regression | 0.883 | 0.157 | 51.0% |
-| **LightGBM** (selected) | **0.894** | **0.189** | **53.8%** |
+| Logistic regression | 0.883 | 0.158 | 51.5% |
+| **LightGBM** (selected) | **0.894** | **0.186** | **52.9%** |
 
-Held-out "production" months 6–7: recall 52–57% at a realised FPR of 3.8–6.0%.
+Held-out "production" months 6–7: recall 50–55% at a realised FPR of 3.5–5.8%.
+`customer_age` is deliberately **not** a model input — see below.
 
 **Monitoring findings**
 - Five features drifted (PSI > 0.25) in production months, all rolling-window counts — `velocity_4w` (PSI 2.9), `velocity_24h` (1.6), `velocity_6h` (0.9), `zip_count_4w`, `date_of_birth_distinct_emails_4w`. The derived velocity *ratios* stayed in the "watch" band (0.13–0.15), so ratio features are more robust to volume shifts than raw counts.
-- **Fairness:** at the deployed threshold, applicants aged 50+ have a false-positive rate of 11.5% vs 3.7% for under-50s (3.1×). The model also catches more of their fraud (67% vs 46%). See the [model card](docs/model_card.md) for the discussion and mitigation options.
+- **Fairness:** with `customer_age` as an input, applicants aged 50+ were wrongly held 3.1× more often than under-50s (FPR 11.5% vs 3.7%). Withholding age costs 0.9 pt of recall and cuts the gap to 2.5× — but not to parity, because income, credit limit and credit score are age proxies. The [model card](docs/model_card.md) documents the decision, the measured cost, and the alternatives considered.
 
 ## How AI tools were used
 _Document here: what Claude Code / Copilot generated, what you changed and why. Interviewers ask._

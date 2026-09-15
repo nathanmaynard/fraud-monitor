@@ -22,6 +22,6 @@ def build_features(df: pd.DataFrame | None = None, db_path=config.DUCKDB_PATH) -
 
 
 def split_xy(feat: pd.DataFrame):
-    X = feat.drop(columns=[config.TARGET, config.MONTH])
+    X = feat.drop(columns=[config.TARGET, config.MONTH, *config.EXCLUDE_FROM_MODEL], errors="ignore")
     y = feat[config.TARGET]
     return X, y
