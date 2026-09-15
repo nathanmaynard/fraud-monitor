@@ -1,0 +1,28 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.11
+      - run: uv sync --extra dev
+      - name: Lint
+        run: uv run ruff check .
+      - name: Unit tests
+        run: uv run pytest -q
+      - name: Data validation + pipeline smoke run (synthetic)
+        run: uv run fm all --synthetic
+      - name: Monitoring gate
+        run: |
+          uv run python - <<'PY'
+          import json
+          s = json.load(open("reports/monitor_summary.json"))
+          print(json.dumps(s, indent=2))
+          assert s["fairness_fpr_ratio"] < 3.0, "FPR gap between age groups too large"
+          PY

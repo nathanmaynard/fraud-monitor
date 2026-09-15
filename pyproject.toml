@@ -1,0 +1,36 @@
+[project]
+name = "fraud-monitor"
+version = "0.1.0"
+description = "Account-opening fraud detection with drift monitoring and a what-if threshold tool (BAF dataset)"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "duckdb>=1.0",
+    "scikit-learn>=1.5",
+    "lightgbm>=4.3",
+    "pandera>=0.20",
+    "streamlit>=1.37",
+    "plotly>=5.22",
+    "joblib>=1.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5", "jupyter", "shap>=0.46"]
+
+[project.scripts]
+fm = "fraud_monitor.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fraud_monitor"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

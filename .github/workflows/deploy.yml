@@ -1,0 +1,28 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  SERVICE: fraud-monitor
+  REGION: europe-west2   # London
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.11 && uv sync
+      # Retrain on merge. Swap --synthetic for a step that pulls Base.csv from GCS once you have it.
+      - run: uv run fm all --synthetic
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud run deploy $SERVICE --source . --region $REGION --allow-unauthenticated --memory 1Gi

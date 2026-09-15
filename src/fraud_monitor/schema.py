@@ -1,0 +1,42 @@
+"""Pandera schema for the raw BAF 'Base' table. Runs in CI as a data-validation gate."""
+import pandera.pandas as pa
+from pandera.pandas import Column
+
+raw_schema = pa.DataFrameSchema(
+    {
+        "fraud_bool": Column(int, pa.Check.isin([0, 1])),
+        "income": Column(float, pa.Check.between(0, 1)),
+        "name_email_similarity": Column(float, pa.Check.between(0, 1)),
+        "prev_address_months_count": Column(int, pa.Check.ge(-1)),
+        "current_address_months_count": Column(int, pa.Check.ge(-1)),
+        "customer_age": Column(int, pa.Check.between(10, 90)),
+        "days_since_request": Column(float, pa.Check.ge(0)),
+        "intended_balcon_amount": Column(float),
+        "payment_type": Column(str),
+        "zip_count_4w": Column(int, pa.Check.ge(0)),
+        "velocity_6h": Column(float),
+        "velocity_24h": Column(float),
+        "velocity_4w": Column(float),
+        "bank_branch_count_8w": Column(int, pa.Check.ge(0)),
+        "date_of_birth_distinct_emails_4w": Column(int, pa.Check.ge(0)),
+        "employment_status": Column(str),
+        "credit_risk_score": Column(int),
+        "email_is_free": Column(int, pa.Check.isin([0, 1])),
+        "housing_status": Column(str),
+        "phone_home_valid": Column(int, pa.Check.isin([0, 1])),
+        "phone_mobile_valid": Column(int, pa.Check.isin([0, 1])),
+        "bank_months_count": Column(int, pa.Check.ge(-1)),
+        "has_other_cards": Column(int, pa.Check.isin([0, 1])),
+        "proposed_credit_limit": Column(float, pa.Check.ge(0)),
+        "foreign_request": Column(int, pa.Check.isin([0, 1])),
+        "source": Column(str),
+        "session_length_in_minutes": Column(float),
+        "device_os": Column(str),
+        "keep_alive_session": Column(int, pa.Check.isin([0, 1])),
+        "device_distinct_emails_8w": Column(int, pa.Check.ge(-1)),
+        "device_fraud_count": Column(int, pa.Check.ge(0)),
+        "month": Column(int, pa.Check.between(0, 7)),
+    },
+    coerce=True,
+    strict=False,
+)
